@@ -1,0 +1,35 @@
+version: "3.8"
+services:
+  vue-rtc:
+    build:
+      context: ./src/vue-rtc
+      dockerfile: ./Dockerfile
+    networks:
+      - rtc
+    ports:
+      - 8080:8080
+    container_name: vue-rtc
+  nest-server:
+    build:
+      context: ./src/nest-server-rtc
+      dockerfile: ./Dockerfile
+    networks:
+      - rtc
+    ports:
+      - 8001:8001
+    container_name: nest-server-rtc
+  proxy:
+    build:
+      context: ./src/proxy
+      dockerfile: ./Dockerfile
+    depends_on:
+      - vue-rtc
+      - nest-server
+    ports:
+      - 80:80
+    networks:
+      - rtc
+    container_name: proxy
+networks:
+  rtc:
+    driver: bridge

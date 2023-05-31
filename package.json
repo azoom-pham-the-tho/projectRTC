@@ -1,0 +1,26 @@
+{
+  "name": "project-rtc",
+  "version": "1.0.0",
+  "description": "test rtc",
+  "repository": "",
+  "author": "tho",
+  "license": "MIT",
+  "dependencies": {
+    "lerna": "^3.20.2"
+  },
+  "scripts": {
+    "setup:env":"npm run setup:env-be && npm run setup:env-fe",
+    "setup:env-be":"cd nest-server-rtc && cp .env.template .env",
+    "setup:env-fe":"cd vue-rtc && cp .env.template .env",
+    "build":"docker-compose build ",
+    "rebuild":"docker-compose up --build",
+    "up": "docker-compose up -d",
+    "down": "docker-compose down",
+    "restart": "docker-compose restart",
+    "log:fe": "docker logs vue-rtc -f",
+    "log:be":"docker logs nest-server-rtc -f",
+    "log:proxy":"docker logs proxy -f",
+    "start:fe":"cd vue-rtc && npm i && npm run serve",
+    "start:be":"cd nest-server-rtc && npm i && npm run start:dev"
+  }
+}
