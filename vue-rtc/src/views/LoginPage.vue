@@ -36,7 +36,7 @@ export default {
   methods: {
     async login() {
       const body = { name: this.name, pass: this.pass };
-      const res = await axiosClient.post("/api/users/login", body);
+      const res = await axiosClient.post("/users/login", body);
       if (res?.data?.token) {
         sessionStorage.setItem("auth", res.data.token);
         sessionStorage.setItem("user", JSON.stringify(res.data.user));

@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Set config defaults when creating the instance
 const AxiosClient = axios.create({
-  baseURL: process.env.DOMAIN_BE,
+  baseURL: "https://api.thopt.website",
 });
 
 // Add a request interceptor

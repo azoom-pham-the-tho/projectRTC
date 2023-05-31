@@ -13,7 +13,7 @@
     "setup:env-be":"cd nest-server-rtc && cp .env.template .env",
     "setup:env-fe":"cd vue-rtc && cp .env.template .env",
     "build":"docker-compose build ",
-    "rebuild":"docker-compose up --build",
+    "rebuild":"docker-compose up --build -f",
     "up": "docker-compose up -d",
     "down": "docker-compose down",
     "restart": "docker-compose restart",
