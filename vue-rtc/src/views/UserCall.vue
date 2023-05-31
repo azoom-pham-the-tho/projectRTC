@@ -92,7 +92,7 @@ export default {
   },
   mounted() {
     this.roomId = this.$route.params.id;
-    const uri = process.env.DOMAIN_BE;
+    const uri = "https://api.thopt.website";
     const token = sessionStorage.getItem("auth");
     if (!token) return this.$router.push("login");
     this.socket = io(uri, {

@@ -19,3 +19,5 @@
 #### Sửa DNS -> Records và thêm record
 1. Type: A , Name: thopt.website(tên miền đã đăng ký), Context : 94.237.79.161 (IP của server)
 2. Type: CNAME , Name: api(subdomain - dùng cho trỏ đến backend), Context : thopt.website (phần nginx sẽ handle server_name: api.thopt.website và trỏ đến Port cuả Backend  )
+3. sửa .env trong proxi DOMAIN= ip của server mình
+4. sửa .env trong vue-rtc DOMAIN_BE= subdomain trỏ đến cổng backend (https://api.thopt.website)
