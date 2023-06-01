@@ -9,4 +9,4 @@ COPY . .
 EXPOSE 8080
 
 
-ENTRYPOINT ["sh", "-c", "yarn && yarn serve"]
+ENTRYPOINT ["sh", "-c", "npm i  && npm run serve"]
