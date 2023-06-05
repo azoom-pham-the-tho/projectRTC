@@ -1,4 +1,15 @@
 export default {
+  getKeyWithDomain() {
+    if(window.location.hostname =='thopt.website'){
+      return "2155a457-35f2-407a-a5bb-074ce7b29242"
+    }
+    if(window.location.hostname =='chromewebdata'){
+      return "7a81ff45-fde5-4beb-be41-85e92e0d0037"
+    }
+    if(window.location.hostname =='localhost'){
+      return "c6cd73b9-f4df-4111-8844-e78ecaa57a7f"
+    }
+  },
   getIceServer() {
     return {
       iceServers: [

@@ -101,7 +101,7 @@ export default {
       },
     });
     this.peer = new Peer(this.name, {
-      key: "c6cd73b9-f4df-4111-8844-e78ecaa57a7f",
+      key: "2155a457-35f2-407a-a5bb-074ce7b29242",
       debug: 3,
     });
     this.peer.on("open", (peerId) => {

@@ -9,6 +9,8 @@ services:
     ports:
       - 8080:8080
     container_name: vue-rtc
+    volumes:
+      - ../src/vue-rtc:/projectRTC-vue-rtc
   nest-server:
     build:
       context: ./nest-server-rtc
@@ -18,6 +20,8 @@ services:
     ports:
       - 8001:8001
     container_name: nest-server-rtc
+    volumes:
+      - ../src/nest-server-rtc:/projectRTC-nest-server
   proxy:
     build:
       context: ./proxy

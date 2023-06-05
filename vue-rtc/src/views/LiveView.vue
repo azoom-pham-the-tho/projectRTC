@@ -33,7 +33,7 @@
             >
               keyboard_voice
             </span>
-            <span v-else class="material-symbols-outlined" @click="chaneMic">
+            <span v-else class="material-symbols-outlined" @click="changeMic">
               mic_off
             </span>
           </div>
@@ -82,7 +82,7 @@
             <div class="contentMessage">
               <div class="item" v-for="(item, index) in comments" :key="index">
                 <div class="message">
-                  <v-avatar :color="getRandomColorName()" size="25" title>
+                  <v-avatar color="green" size="25" title>
                     <v-tooltip left>
                       <template v-slot:activator="{ on, attrs }">
                         <span
@@ -96,14 +96,44 @@
                     </v-tooltip>
                   </v-avatar>
                   &nbsp;
-                  <p class="content">{{ item.content }}</p>
+                  <p class="content">
+                    <span v-if="item.type == 'text'">
+                      {{ item.content }}
+                    </span>
+                    <span v-if="item.type == 'file'">
+                      {{ handelSrcViewImage(item.content, index) }}
+                      <v-img
+                        contain
+                        :lazy-src="item.imgSrc"
+                        max-height="250"
+                        max-width="320"
+                        :src="item.imgSrc"
+                      ></v-img>
+                    </span>
+                  </p>
                   <p class="time">{{ item.time }}</p>
                 </div>
               </div>
             </div>
           </v-col>
-          <v-col cols="24">
+          <v-col class="input" cols="24">
+            <v-file-input
+              class="file"
+              v-model="file"
+              label="File selected"
+              outlined
+              dense
+              show-size
+              hide-details="auto"
+              :hide-input="file ? false : true"
+              :append-outer-icon="file ? 'mdi-send' : ''"
+              clear-icon="mdi-close-circle"
+              @click:append-outer="sendMessage"
+              @keyup.enter.prevent="sendMessage"
+            ></v-file-input>
             <v-text-field
+              v-if="!file"
+              class="text"
               v-model="message"
               append-outer-icon="mdi-send"
               clear-icon="mdi-close-circle"
@@ -112,7 +142,7 @@
               :placeholder="'Gửi bình luận cho ' + liveStream.userName"
               solo
               @click:append-outer="sendMessage"
-              @keydown.enter.prevent="sendMessage"
+              @keyup.enter.prevent="sendMessage"
               hide-details="auto"
               type="text"
             ></v-text-field>
@@ -123,8 +153,9 @@
   </div>
 </template>
 <script>
-import { Manager } from "socket.io-client";
+// import { Manager } from "socket.io-client";
 import Peer from "skyway-js";
+import moment from "moment";
 export default {
   data() {
     return {
@@ -138,139 +169,15 @@ export default {
         title: "bán hành",
         description:
           "quy tụ anh em bán hành yasuo quy tụ anh em bán hành yasuoquy tụ anh em bán hành yasuoquy tụ anh em bán hành yasuoquy tụ anh em bán hành yasuo quy tụ anh em bán hành yasuo quy tụ anh em bán hành yasuo",
-        startTime: "21-05-2023 17:30",
-        endTime: "21-05-2023 21:00",
+        startTime: "Fri Jun 02 2023 11:30:00 GMT+0700",
+        endTime: "Fri Jun 02 2023 13:00:00 GMT+0700",
       },
       myStream: null,
-      comments: [
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho1",
-          content: "kkkk",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-        {
-          userId: 1,
-          name: "tho",
-          content:
-            "cdacd cdacdcda cdcdacd  cdcd cdacd  cdacds cdacdsc cxc xss cdd dacds lorem cda dacd s cda csd  fv cdad xdds xss  xs",
-          time: "03:50",
-        },
-      ],
+      comments: [],
       userJoin: [],
       message: "",
+      file: null,
+      imgTemp: "",
       peers: [],
       optionMedia: {
         cam: true, //{ width: 720, height: 480 },
@@ -282,44 +189,57 @@ export default {
 
   mounted() {
     this.roomId = this.$route.params.id;
-    const uri = "http://94.237.79.161:8001/";
-    const token = sessionStorage.getItem("auth");
+    // const uri = "https://api.thopt.website";
+    // const token = sessionStorage.getItem("auth");
     this.currentUser = JSON.parse(sessionStorage.getItem("user"));
 
-    const manager = new Manager(uri, {
-      extraHeaders: {
-        authorization: `Beaer ${token}`,
-      },
-    });
-    this.socket = manager.socket("/livestream", { forceNew: true });
-    if (!token) return this.$router.push("login");
+    // const manager = new Manager(uri, {
+    //   extraHeaders: {
+    //     authorization: `Beaer ${token}`,
+    //   },
+    // });
+    // this.socket = manager.socket("/livestream", { forceNew: true });
+    // if (!token) return this.$router.push("login");
 
-    //local: c6cd73b9-f4df-4111-8844-e78ecaa57a7f
-    //server: 7a81ff45-fde5-4beb-be41-85e92e0d0037
+    console.log("2155a457-35f2-407a-a5bb-074ce7b29242");
     this.peer = new Peer(this.name, {
-      key: "c6cd73b9-f4df-4111-8844-e78ecaa57a7f",
+      key: "2155a457-35f2-407a-a5bb-074ce7b29242",
       debug: 3,
     });
     this.peer.on("open", (peerId) => {
       this.peerId = peerId;
-      if (this.currentUser.id == this.liveStream.userId) {
-        console.log("getUserMedia");
-        navigator.mediaDevices
-          .getUserMedia({
-            video: this.optionMedia.cam,
-            audio: this.optionMedia.mic,
-          })
-          .then((stream) => {
-            this.myStream = stream;
-          })
-          .then(this.joinRoom)
-          .catch((err) => {
-            console.log(err);
-            // alert(`Error: Your device cannot use this type of stream.`);
-          });
-      } else {
-        this.joinRoom();
-      }
+      // navigator.mediaDevices
+      //   .getUserMedia({
+      //     video: this.optionMedia.cam,
+      //     audio: this.optionMedia.mic,
+      //   })
+      //   .then((stream) => {
+      //     this.myStream = stream;
+      //   })
+      //   .then(this.joinRoom)
+      //   .catch((err) => {
+      //     console.log(err);
+      //     alert(`Error: Your device cannot use this type of stream.`);
+      //   });
+      // if (this.currentUser.id == this.liveStream.userId) {
+      //   console.log("getUserMedia");
+      //   navigator.mediaDevices
+      //     .getUserMedia({
+      //       video: this.optionMedia.cam,
+      //       audio: this.optionMedia.mic,
+      //     })
+      //     .then((stream) => {
+      //       this.myStream = stream;
+      //     })
+      //     .then(this.joinRoom)
+      //     .catch((err) => {
+      //       console.log(err);
+      //       // alert(`Error: Your device cannot use this type of stream.`);
+      //     });
+      // } else {
+      //   this.joinRoom();
+      // }
+      this.joinRoom();
     });
   },
   methods: {
@@ -342,10 +262,12 @@ export default {
       });
       this.room.on("peerJoin", (peerId) => {
         console.log(`=== ${peerId} joined ===\n`);
+        this.peers.push(peer);
       });
 
       this.room.on("peerLeave", (peerId) => {
         console.log("peerLeave", peerId);
+        this.peers = this.peers.filter((item) => item != peer);
       });
 
       this.room.on("stream", async (stream) => {
@@ -357,8 +279,7 @@ export default {
         this.myStream = stream;
       });
       this.room.on("data", ({ data }) => {
-        // Xử lý dữ liệu nhận được từ kênh dữ liệu
-        console.log("data", data);
+        this.comments = [this.comment, ...data];
       });
     },
     getRandomColorName() {
@@ -379,8 +300,87 @@ export default {
       return colorNames[randomIndex];
     },
     sendMessage() {
-      console.log("send");
-      this.room.send("MESSAGE", "thoddya");
+      if (this.message || this.file?.name) {
+        const duration = moment.duration(
+          moment().diff(moment(this.liveStream.startTime))
+        );
+        const content = this.message || this.file;
+        let type = "";
+        if (this.message) {
+          type = "text";
+        }
+        if (this.file) {
+          type = "file";
+        }
+        const data = {
+          type,
+          content,
+          channel: "message",
+          userId: 1,
+          name: "tho",
+          time: `${duration.hours()}:${duration.minutes()}:${duration.seconds()}`,
+        };
+
+        Vue.set(this.comments, this.comments.length+1, data)
+        this.message = null;
+        this.file = null;
+        this.room.send(data);
+      }
+    },
+    handelSrcViewImage(file, index) {
+      if (file && file.type?.startsWith("image/")) {
+        const reader = new FileReader();
+        // Đọc tệp ảnh
+        reader.onload = () => {
+          this.comments[index].imgSrc = reader.result;
+        };
+
+        // Đọc dữ liệu tệp ảnh dưới dạng URL dữ liệu
+        reader.readAsDataURL(file);
+      }
+    },
+    changeMic() {
+      this.optionMedia.mic = !this.optionMedia.mic;
+      this.myStream.getAudioTracks()[0].enabled = this.optionMedia.mic;
+      return true;
+    },
+    changeCam() {
+      this.optionMedia.cam = !this.optionMedia.cam;
+      this.myStream.getVideoTracks()[0].enabled = this.optionMedia.cam;
+      this.room.replaceStream(this.myStream);
+      return true;
+    },
+    shareScreen() {
+      navigator.mediaDevices
+        .getDisplayMedia({
+          video: {
+            cursor: "always",
+            frameRate: 30,
+          },
+        })
+        .then((streamScreen) => {
+          this.optionMedia.share = !this.optionMedia.share;
+          this.streamTemp = this.myStream;
+          this.myStream = streamScreen;
+          this.room.replaceStream(streamScreen);
+          streamScreen.getVideoTracks()[0].onended = () => {
+            //listen when click stop share on browser
+            this.stopSharingScreen();
+          };
+        });
+      return true;
+    },
+    stopSharingScreen() {
+      console.log("end share");
+      this.room.replaceStream(this.streamTemp);
+      this.myStream = this.streamTemp;
+    },
+    onClose() {
+      this.socket.emit("end-call", this.roomId);
+      if (this.room) this.room.close();
+      if (this.peer) this.peer.destroy();
+      this.myStream.getTracks().forEach((track) => track.stop());
+      this.$router.push("/");
     },
   },
 };
@@ -450,6 +450,13 @@ export default {
   display: flex;
   flex-direction: column;
   background-color: aliceblue;
+}
+.comment > .input {
+  display: flex;
+  background-color: rgba(225, 225, 225, 1);
+}
+.comment > .input > .text {
+  width: 100%;
 }
 .comment .contentMessage {
   display: flex;
