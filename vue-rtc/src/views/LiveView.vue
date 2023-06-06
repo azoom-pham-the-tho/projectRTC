@@ -8,7 +8,7 @@
               <template v-slot:activator="{ on, attrs }">
                 <div v-bind="attrs" v-on="on">
                   <span class="mdi mdi-eye-outline"></span>
-                  <span> {{ userJoin.length }}</span>
+                  <span> {{ room?.members?.length || 0 }}</span>
                 </div>
               </template>
               <div class="item" v-for="(item, index) in userJoin" :key="index">
@@ -80,7 +80,12 @@
           <h2>Comment</h2>
           <v-col cols="24">
             <div class="contentMessage">
-              <div class="item" v-for="(item, index) in comments" :key="index">
+              <div
+                class="item"
+                v-for="(item, index) in comments"
+                :key="index"
+                @dblclick="handleDeleteComment(item)"
+              >
                 <div class="message">
                   <v-avatar color="green" size="25" title>
                     <v-tooltip left>
@@ -97,21 +102,66 @@
                   </v-avatar>
                   &nbsp;
                   <p class="content">
-                    <span v-if="item.type == 'text'">
+                    <span v-if="item.contentType == 'text'">
                       {{ item.content }}
                     </span>
-                    <span v-if="item.type == 'file'">
-                      {{ handelSrcViewImage(item.content, index) }}
-                      <v-img
-                        contain
-                        :lazy-src="item.imgSrc"
-                        max-height="250"
-                        max-width="320"
-                        :src="item.imgSrc"
-                      ></v-img>
+                    <span v-else-if="item.fileInfo.type.startsWith('image/')">
+                      <v-dialog v-model="dialog" width="85%">
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-img
+                            contain
+                            :lazy-src="item.fileSrc"
+                            max-height="250"
+                            max-width="320"
+                            :src="item.fileSrc"
+                            v-bind="attrs"
+                            v-on="on"
+                          ></v-img>
+                        </template>
+
+                        <v-card>
+                          <v-img
+                            contain
+                            :lazy-src="item.fileSrc"
+                            max-width="100%"
+                            width="auto"
+                            :src="item.fileSrc"
+                          ></v-img>
+                        </v-card>
+                      </v-dialog>
+                    </span>
+                    <span
+                      v-else
+                      @click="handleDownloadfile(item.fileInfo, item.fileSrc)"
+                    >
+                      <v-icon small color="blue-gray darken-2">
+                        mdi-file
+                      </v-icon>
+                      {{ item.fileInfo.name }} -
+                      {{ item.fileInfo.size }}
+                      <v-icon small color="blue darken-2">
+                        mdi-download
+                      </v-icon>
                     </span>
                   </p>
                   <p class="time">{{ item.time }}</p>
+
+                  <!-- <v-hover v-slot="{ hover }">
+                    <v-expand-transition>
+                      <p v-if="!hover" class="time">{{ item.time }}</p>
+                      <v-menu v-else offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn dark v-bind="attrs" v-on="on">...</v-btn>
+                        </template>
+                        <v-list>
+                          <v-list-item>
+                            <v-list-item-title>xoá</v-list-item-title>
+                            downlaod file
+                          </v-list-item>
+                        </v-list>
+                      </v-menu>
+                    </v-expand-transition>
+                  </v-hover> -->
                 </div>
               </div>
             </div>
@@ -172,8 +222,14 @@ export default {
         startTime: "Fri Jun 02 2023 11:30:00 GMT+0700",
         endTime: "Fri Jun 02 2023 13:00:00 GMT+0700",
       },
+      currentUser: {
+        userId: 1,
+        name: "tho",
+      },
       myStream: null,
+      room: null,
       comments: [],
+      dialog: false,
       userJoin: [],
       message: "",
       file: null,
@@ -191,7 +247,7 @@ export default {
     this.roomId = this.$route.params.id;
     // const uri = "https://api.thopt.website";
     // const token = sessionStorage.getItem("auth");
-    this.currentUser = JSON.parse(sessionStorage.getItem("user"));
+    // this.currentUser = JSON.parse(sessionStorage.getItem("user"));
 
     // const manager = new Manager(uri, {
     //   extraHeaders: {
@@ -242,6 +298,7 @@ export default {
       this.joinRoom();
     });
   },
+  watch: {},
   methods: {
     joinRoom() {
       const peer = this.peer;
@@ -279,8 +336,24 @@ export default {
         this.myStream = stream;
       });
       this.room.on("data", ({ data }) => {
-        this.comments = [this.comment, ...data];
+        if (data.type == "send") {
+          if (data.contentType == "file") {
+            data.fileSrc = URL.createObjectURL(new Blob([data.content]));
+          }
+          this.$set(this.comments, this.comments.length, data);
+        }
+
+        if (data.type == "delete") {
+          this.comments = this.comments.filter(
+            (item) =>
+              !(
+                item.key == data.comment.key &&
+                item.userId == data.comment.userId
+              )
+          );
+        }
       });
+      // Xử lý sự kiện khi buffer đã giảm xuống mức thấp
     },
     getRandomColorName() {
       const colorNames = [
@@ -305,40 +378,62 @@ export default {
           moment().diff(moment(this.liveStream.startTime))
         );
         const content = this.message || this.file;
-        let type = "";
-        if (this.message) {
-          type = "text";
-        }
-        if (this.file) {
-          type = "file";
-        }
+
         const data = {
-          type,
+          type: "send",
+          key: Date.now(),
           content,
           channel: "message",
-          userId: 1,
-          name: "tho",
+          userId: this.currentUser.id,
+          name: this.currentUser.name,
           time: `${duration.hours()}:${duration.minutes()}:${duration.seconds()}`,
         };
 
-        Vue.set(this.comments, this.comments.length+1, data)
+        if (this.message) {
+          data.contentType = "text";
+        }
+
+        if (this.file) {
+          data.contentType = "file";
+          data.fileInfo = {
+            type: this.file?.type,
+            name: this.file?.name,
+            size: this.formatFileSize(this.file?.size),
+          };
+        }
+
+        data.fileSrc = URL.createObjectURL(new Blob([data.content]));
+        this.$set(this.comments, this.comments.length, data);
         this.message = null;
         this.file = null;
         this.room.send(data);
       }
     },
-    handelSrcViewImage(file, index) {
-      if (file && file.type?.startsWith("image/")) {
-        const reader = new FileReader();
-        // Đọc tệp ảnh
-        reader.onload = () => {
-          this.comments[index].imgSrc = reader.result;
-        };
+    handleDownloadfile(fileInfo, fileSrc) {
+      const downloadLink = document.createElement("a");
+      downloadLink.href = fileSrc;
+      downloadLink.download = fileInfo.name;
+      downloadLink.style.display = "none";
 
-        // Đọc dữ liệu tệp ảnh dưới dạng URL dữ liệu
-        reader.readAsDataURL(file);
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+
+      document.body.removeChild(downloadLink);
+    },
+    handleDeleteComment(comment) {
+      this.comments = this.comments.filter(
+        (item) =>
+          !(item.key == comment.key && item.userId == this.currentUser.userId)
+      );
+      if (comment.userId == this.currentUser.userId) {
+        const data = {
+          type: "delete",
+          comment,
+        };
+        this.room.send(data);
       }
     },
+
     changeMic() {
       this.optionMedia.mic = !this.optionMedia.mic;
       this.myStream.getAudioTracks()[0].enabled = this.optionMedia.mic;
@@ -381,6 +476,24 @@ export default {
       if (this.peer) this.peer.destroy();
       this.myStream.getTracks().forEach((track) => track.stop());
       this.$router.push("/");
+    },
+    formatFileSize(sizeInBytes) {
+      const kilobyte = 1024;
+      const megabyte = kilobyte * 1024;
+      const gigabyte = megabyte * 1024;
+
+      if (sizeInBytes < kilobyte) {
+        return sizeInBytes + " B";
+      } else if (sizeInBytes < megabyte) {
+        const sizeInKB = (sizeInBytes / kilobyte).toFixed(2);
+        return sizeInKB + " KB";
+      } else if (sizeInBytes < gigabyte) {
+        const sizeInMB = (sizeInBytes / megabyte).toFixed(2);
+        return sizeInMB + " MB";
+      } else {
+        const sizeInGB = (sizeInBytes / gigabyte).toFixed(2);
+        return sizeInGB + " GB";
+      }
     },
   },
 };

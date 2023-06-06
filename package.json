@@ -15,9 +15,9 @@
     "build": "docker-compose build --no-cache",
     "rebuild": "docker-compose up --build -f",
     "up": "docker-compose up -d",
-    "down": "docker-compose down",
-    "deleteimg":"docker-compose rm -v ",
-    "restart": "npm run down && npm run deleteimg && npm run build && npm run up",
+    "down": "docker-compose down --rmi all",
+    "start": "npm run build && npm run up",
+    "restart": "npm run down && npm run build && npm run up",
     "log:fe": "docker logs vue-rtc -f",
     "log:be": "docker logs nest-server-rtc -f",
     "log:proxy": "docker logs proxy -f",
@@ -27,6 +27,7 @@
     "pm2:stop": "pm2 stop all",
     "pm2:restart": "pm2 restart all",
     "pm2:delete": "pm2 delete all",
-    "pm2:log": "pm2 monit"
+    "pm2:log": "pm2 monit",
+    "clear-build": "docker builder prune"
   }
 }
