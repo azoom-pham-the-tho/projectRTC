@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: thopt
+
+Resources:
+  VueRTCFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: vue-rtc/
+      Handler: index.handler
+      Runtime: nodejs16.x
+      Events:
+        HTTPEvent:
+          Type: Api
+          Properties:
+            Path: /vue
+            Method: get
+
+  NestServerRTCFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: nest-server-rtc/
+      Handler: index.handler
+      Runtime: nodejs16.x
+      Events:
+        HTTPEvent:
+          Type: Api
+          Properties:
+            Path: /nest
+            Method: get
