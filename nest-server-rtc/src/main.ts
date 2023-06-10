@@ -11,6 +11,7 @@ async function bootstrap() {
     origin: '*',
     methods: '*',
   });
+  console.log('kaka');
 
   await app.listen(8001);
 }
