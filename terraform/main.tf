@@ -204,22 +204,135 @@ resource "aws_route_table_association" "public_private" {
 
 
 
-data "archive_file" "lambda_source_code" {
-  type = "zip"
+# data "archive_file" "lambda_source_code" {
+#   type = "zip"
 
-  source_dir  = "${path.module}/source-code"
-  output_path = "${path.module}/source-code/be.zip"
+#   source_dir  = "${path.module}/source-code"
+#   output_path = "${path.module}/source-code/be.zip"
+# }
+
+
+// start
+resource "aws_s3_object" "lambda_s3_object" {
+  bucket = "lambda_s3_bucket"
+  key = "lambda_rtc"
+  source = "terraform/certificate"
 }
 
+resource "aws_s3_bucket" "lambda_bucket" {
+  bucket = "lambda_source_bucket"
+  tags = {
+    Name = "source code lambda"
+    Enviromnent = "Dev"
+  }
+}
+
+resource "aws_codepipeline" "lambda_pipeline" {
+  name     = "lambda-pipeline"
+  role_arn = aws_iam_role.pipeline_role.arn
+
+  artifact_store {
+    location = aws_s3_bucket.lambda_bucket.bucket
+    type     = "S3"
+  }
+
+  stage {
+    name = "Source"
+
+    action {
+      name             = "Source"
+      category         = "Source"
+      owner            = "ThirdParty"
+      provider         = "GitHub"
+      version          = "1"
+      output_artifacts = ["source_output"]
+
+      configuration = {
+        Owner              = "owner"
+        Repo               = "repo"
+        Branch             = "branch"
+        OAuthToken         = var.github_token
+        PollForSourceChanges = "false"
+      }
+    }
+  }
+
+  stage {
+    name = "Build"
+
+    action {
+      name            = "Build"
+      category        = "Build"
+      owner           = "AWS"
+      provider        = "CodeBuild"
+      version         = "1"
+      input_artifacts = ["source_output"]
+      output_artifacts = ["build_output"]
+
+      configuration = {
+        ProjectName = "lambda-build"
+      }
+    }
+  }
+
+  stage {
+    name = "Deploy"
+
+    action {
+      name            = "Deploy"
+      category        = "Deploy"
+      owner           = "AWS"
+      version         = "1"
+      provider        = "Lambda"
+      input_artifacts = ["build_output"]
+
+      configuration = {
+        FunctionName = aws_lambda_function.rtc_lambda.function_name
+        UserParameters = "parameter"
+      }
+    }
+  }
+}
+
+resource "aws_codebuild_project" "lambda_build" {
+  name          = "lambda-build"
+  description   = "Build Lambda function"
+  service_role  = aws_iam_role.build_role.arn
+  source {
+    type            = "CODEPIPELINE"
+    buildspec       = "buildspec.yaml"
+    git_clone_depth = 1
+  }
+  artifacts {
+    type = "CODEPIPELINE"
+  }
+  environment {
+    compute_type                = "BUILD_GENERAL1_SMALL"
+    image                       = "aws/codebuild/standard:1.0"
+    type                        = "LINUX_CONTAINER"
+    image_pull_credentials_type = "CODEBUILD"
+    environment_variable {
+      name = "VUE_APP_API_URL"
+      value= "thopt.website"
+    }
+    environment_variable {
+      name = "NEST_APP_API_URL"
+      value= "api.thopt.website"
+    }
+  }
+
+}
+//end
 resource "aws_lambda_function" "rtc_lambda" {
   function_name = var.lambda_function_name
   filename       = "${path.module}/source-code/be.zip"
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "index.js"
-  source_code_hash = data.archive_file.lambda_source_code.output_base64sha256
-
+  s3_bucket     = aws_s3_bucket.lambda_bucket.id
+  s3_key        = aws_s3_object.lambda_s3_object.key
   runtime = "nodejs16.x"
 
+  # source_code_hash = data.archive_file.lambda_source_code.output_base64sha256
   ephemeral_storage {
     size = 512 # Min 512 MB and the Max 10240 MB
   }
@@ -229,12 +342,7 @@ resource "aws_lambda_function" "rtc_lambda" {
     security_group_ids = [aws_security_group.lambda_allow_tls.id]
   }
 
-  environment {
-    variables = {
-      VUE_APP_API_URL = "thopt.website"
-      NEST_APP_API_URL= "api.thopt.website"
-    }
-  }
+ 
 
   depends_on = [
     aws_iam_role_policy_attachment.lambda_logs,
