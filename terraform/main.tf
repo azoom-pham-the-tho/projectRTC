@@ -1,9 +1,3 @@
-variable "lambda_function_name" {
-  default = "lambda_function_name"
-}
-variable "github_token" {
-  default = "github token"
-}
 
 provider "aws" {
   region = "us-east-1"
@@ -120,21 +114,43 @@ resource "aws_security_group" "lambda_allow_tls" {
   }
 }
 
-resource "aws_subnet" "lambda_private_subnet" {
+resource "aws_subnet" "lambda_private_subnet_be" {
 
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1"
 
   tags = {
-    "Name" = "lambda-private-subnet"
+    "Name" = "lambda-private-subnet_be"
   }
 }
 
-resource "aws_subnet" "lambda_public_subnet" {
+resource "aws_subnet" "lambda_private_subnet_fe" {
 
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-1"
+
+  tags = {
+    "Name" = "lambda-private-subnet_fe"
+  }
+}
+
+resource "aws_subnet" "lambda_public_subnet_be" {
+
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = "10.0.10.0/24"
+  availability_zone = "us-east-1"
+  map_public_ip_on_launch = true
+
+  tags = {
+    "Name" = "lambda-public-subnet"
+  }
+}
+resource "aws_subnet" "lambda_public_subnet_fe" {
+
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = "10.0.11.0/24"
   availability_zone = "us-east-1"
   map_public_ip_on_launch = true
 
@@ -143,15 +159,9 @@ resource "aws_subnet" "lambda_public_subnet" {
   }
 }
 
-resource "aws_internet_gateway" "lambda_ig" {
-  vpc_id = aws_vpc.vpc.id
 
-  tags = {
-    "Name" = "lambda-internet-gateway"
-  }
-}
 
-resource "aws_route_table" "route-table-public" {
+resource "aws_route_table" "route-table-public-be" {
   vpc_id = aws_vpc.vpc.id
 
   route {
@@ -164,225 +174,123 @@ resource "aws_route_table" "route-table-public" {
   }
 }
 
-resource "aws_route_table_association" "public-association" {
-  subnet_id      = aws_subnet.lambda_public_subnet.id
-  route_table_id = aws_route_table.route-table-public.id
+resource "aws_route_table" "route-table-public-fe" {
+  vpc_id = aws_vpc.vpc.id
+
+  route {
+    cidr_block = "0.0.1.0/0"
+    gateway_id = aws_internet_gateway.lambda_ig.id
+  }
+
+  tags = {
+    "Name" = "proute-table-public"
+  }
 }
 
-resource "aws_eip" "nat" {
+resource "aws_route_table_association" "public-association-be" {
+  subnet_id      = aws_subnet.lambda_private_subnet_be.id
+  route_table_id = aws_route_table.route-table-public-be.id
+}
+
+resource "aws_route_table_association" "public-association_fe" {
+  subnet_id      = aws_subnet.lambda_private_subnet_fe.id
+  route_table_id = aws_route_table.route-table-public-fe.id
+}
+
+resource "aws_eip" "nat_be" {
   domain = "vpc"
 }
 
-resource "aws_nat_gateway" "lambda_nat_gateway" {
-  depends_on = [aws_internet_gateway.lambda_ig]
+resource "aws_eip" "nat_fe" {
+  domain = "vpc"
+}
 
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.lambda_public_subnet.id
+resource "aws_internet_gateway" "lambda_ig" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    "Name" = "lambda-internet-gateway"
+  }
+}
+
+resource "aws_nat_gateway" "lambda_nat_gateway_be" {
+  depends_on = [aws_internet_gateway.lambda_ig]
+  allocation_id = aws_eip.nat_be.id
+  subnet_id     = aws_subnet.lambda_public_subnet_be.id
+
+  tags = {
+    Name = "Public NAT"
+  }
+}
+resource "aws_nat_gateway" "lambda_nat_gateway_fe" {
+  depends_on = [aws_internet_gateway.lambda_ig]
+  allocation_id = aws_eip.nat_fe.id
+  subnet_id     = aws_subnet.lambda_public_subnet_fe.id
 
   tags = {
     Name = "Public NAT"
   }
 }
 
-resource "aws_route_table" "lambda_private" {
-  vpc_id = aws_vpc.vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.lambda_nat_gateway.id
-  }
-
-  tags = {
-    Name = "private"
-  }
+data "archive_file" "lambda_source_code_be" {
+  type = "zip"
+  source_dir  = "${path.module}/../nest-server-rtc"
+  output_path = "${path.module}/source-code/nest-server-rtc.zip"
 }
 
-resource "aws_route_table_association" "public_private" {
-  subnet_id      = aws_subnet.lambda_private_subnet.id
-  route_table_id = aws_route_table.lambda_private.id
+data "archive_file" "lambda_source_code_fe" {
+  type = "zip"
+  source_dir  = "${path.module}/../vue-rtc"
+  output_path = "${path.module}/source-code/vue-rtc.zip"
 }
 
 
-
-# data "archive_file" "lambda_source_code" {
-#   type = "zip"
-
-#   source_dir  = "${path.module}/source-code"
-#   output_path = "${path.module}/source-code/be.zip"
-# }
-
-
-// start
-resource "aws_s3_object" "lambda_s3_object" {
-  bucket = "lambda_s3_bucket"
-  key = "lambda_rtc"
-  source = "terraform/certificate"
-}
-
-resource "aws_s3_bucket" "lambda_bucket" {
-  bucket = "lambda_source_bucket"
-  tags = {
-    Name = "source code lambda"
-    Enviromnent = "Dev"
-  }
-}
-
-resource "aws_codepipeline" "lambda_pipeline" {
-  name     = "lambda-pipeline"
-  role_arn = aws_iam_role.pipeline_role.arn
-
-  artifact_store {
-    location = aws_s3_bucket.lambda_bucket.bucket
-    type     = "S3"
-  }
-
-  stage {
-    name = "Source"
-
-    action {
-      name             = "Source"
-      category         = "Source"
-      owner            = "ThirdParty"
-      provider         = "GitHub"
-      version          = "1"
-      output_artifacts = ["source_output"]
-
-      configuration = {
-        Owner              = "owner"
-        Repo               = "repo"
-        Branch             = "branch"
-        OAuthToken         = var.github_token
-        PollForSourceChanges = "false"
-      }
-    }
-  }
-
-  stage {
-    name = "Build"
-
-    action {
-      name            = "Build"
-      category        = "Build"
-      owner           = "AWS"
-      provider        = "CodeBuild"
-      version         = "1"
-      input_artifacts = ["source_output"]
-      output_artifacts = ["build_output"]
-
-      configuration = {
-        ProjectName = "lambda-build"
-      }
-    }
-  }
-
-  stage {
-    name = "Deploy"
-
-    action {
-      name            = "Deploy"
-      category        = "Deploy"
-      owner           = "AWS"
-      version         = "1"
-      provider        = "Lambda"
-      input_artifacts = ["build_output"]
-
-      configuration = {
-        FunctionName = aws_lambda_function.rtc_lambda.function_name
-        UserParameters = "parameter"
-      }
-    }
-  }
-}
-
-resource "aws_codebuild_project" "lambda_build" {
-  name          = "lambda-build"
-  description   = "Build Lambda function"
-  service_role  = aws_iam_role.build_role.arn
-  source {
-    type            = "CODEPIPELINE"
-    buildspec       = "buildspec.yaml"
-    git_clone_depth = 1
-  }
-  artifacts {
-    type = "CODEPIPELINE"
-  }
-  environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/standard:1.0"
-    type                        = "LINUX_CONTAINER"
-    image_pull_credentials_type = "CODEBUILD"
-    environment_variable {
-      name = "VUE_APP_API_URL"
-      value= "thopt.website"
-    }
-    environment_variable {
-      name = "NEST_APP_API_URL"
-      value= "api.thopt.website"
-    }
-  }
-
-}
-//end
-resource "aws_lambda_function" "rtc_lambda" {
-  function_name = var.lambda_function_name
-  filename       = "${path.module}/source-code/be.zip"
+resource "aws_lambda_function" "rtc_be_lambda" {
+  function_name = "lambda-be"
+  filename       = "${data.archive_file.lambda_source_code_be.output_path}"
   role          = aws_iam_role.iam_for_lambda.arn
-  handler       = "index.js"
-  s3_bucket     = aws_s3_bucket.lambda_bucket.id
-  s3_key        = aws_s3_object.lambda_s3_object.key
+  handler       = "handler.js"
   runtime = "nodejs16.x"
 
-  # source_code_hash = data.archive_file.lambda_source_code.output_base64sha256
+  source_code_hash = data.archive_file.lambda_source_code_be.output_base64sha256
   ephemeral_storage {
     size = 512 # Min 512 MB and the Max 10240 MB
   }
 
   vpc_config {
-    subnet_ids         = [aws_subnet.lambda_private_subnet.id]
+    subnet_ids         = [aws_subnet.lambda_private_subnet_be.id]
     security_group_ids = [aws_security_group.lambda_allow_tls.id]
   }
-
- 
 
   depends_on = [
     aws_iam_role_policy_attachment.lambda_logs,
     aws_cloudwatch_log_group.cloudwatch_lambda_group,
-    aws_efs_mount_target.alpha,
     aws_internet_gateway.lambda_ig,
   ]
 }
 
-# EFS file system
-resource "aws_efs_file_system" "efs_for_lambda" {
-  tags = {
-    Name = "efs_for_lambda"
-  }
-}
+resource "aws_lambda_function" "rtc_fe_lambda" {
+  function_name = "lambda-fe"
+  filename       = "${data.archive_file.lambda_source_code_fe.output_path}"
+  role          = aws_iam_role.iam_for_lambda.arn
+  handler       = "handler.js"
+  runtime = "nodejs16.x"
 
-# Mount target connects the file system to the subnet
-resource "aws_efs_mount_target" "alpha" {
-  file_system_id  = aws_efs_file_system.efs_for_lambda.id
-  subnet_id       = aws_subnet.lambda_private_subnet.id
-  security_groups = [aws_security_group.lambda_allow_tls.id]
-}
-
-# EFS access point used by lambda file system
-resource "aws_efs_access_point" "access_point_for_lambda" {
-  file_system_id = aws_efs_file_system.efs_for_lambda.id
-
-  root_directory {
-    path = "/lambda"
-    creation_info {
-      owner_gid   = 1000
-      owner_uid   = 1000
-      permissions = "777"
-    }
+  source_code_hash = data.archive_file.lambda_source_code_fe.output_base64sha256
+  ephemeral_storage {
+    size = 512 # Min 512 MB and the Max 10240 MB
   }
 
-  posix_user {
-    gid = 1000
-    uid = 1000
+  vpc_config {
+    subnet_ids         = [aws_subnet.lambda_private_subnet_fe.id]
+    security_group_ids = [aws_security_group.lambda_allow_tls.id]
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_logs,
+    aws_cloudwatch_log_group.cloudwatch_lambda_group,
+    aws_internet_gateway.lambda_ig,
+  ]
 }
 
 resource "aws_cloudwatch_log_group" "cloudwatch_lambda_group" {

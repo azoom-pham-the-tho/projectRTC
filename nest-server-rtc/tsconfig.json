@@ -35,7 +35,8 @@
   "include": [
     "src",
     "package.json",
-    "src/http/modules/admin/admin/.service.ts"
+    "src/http/modules/admin/admin/.service.ts",
+    "handler.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }
