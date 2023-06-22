@@ -1,12 +1,15 @@
-const Vue = require("vue");
-const renderer = require("vue-server-renderer").createRenderer();
-
+const  Vue = require("vue");
+const  renderer = require("vue-server-renderer");
+const  App = require("./src/App.vue");
+const  router = require ("./src/router");
+const vuetify = require ("./src/plugins/vuetify");
+renderer.createRenderer();
 exports.handler = async (event, context) => {
-  console.log("Received event:", JSON.stringify(event, null, 2));
-
   const app = new Vue({
-    template: "<div>Hello World!</div>",
-  });
+    router,
+    vuetify,
+    render: (h) => h(App),
+  }).$mount("#app");
 
   const html = await renderer.renderToString(app);
 
