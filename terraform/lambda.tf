@@ -7,10 +7,10 @@ resource "aws_lambda_function" "lambda_fe" {
   runtime = "nodejs16.x"
   handler = "handler.handler"
 
-  # vpc_config {
-  #   subnet_ids         = [aws_subnet.subnet_fe.id]
-  #   security_group_ids = [aws_security_group.security_group.id]
-  # }
+  vpc_config {
+    subnet_ids         = [aws_subnet.subnet_fe.id]
+    security_group_ids = [aws_security_group.security_group.id]
+  }
 
   source_code_hash = data.archive_file.source_fe.output_base64sha256
 
@@ -26,10 +26,10 @@ resource "aws_lambda_function" "lambda_be" {
   runtime = "nodejs16.x"
   handler = "handler.handler"
 
-  # vpc_config {
-  #   subnet_ids         = [aws_subnet.subnet_be.id]
-  #   security_group_ids = [aws_security_group.security_group.id]
-  # }
+  vpc_config {
+    subnet_ids         = [aws_subnet.subnet_be.id]
+    security_group_ids = [aws_security_group.security_group.id]
+  }
   source_code_hash = data.archive_file.source_be.output_base64sha256
 
   role = aws_iam_role.lambda_role.arn
