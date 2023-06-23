@@ -1,6 +1,6 @@
 resource "aws_lambda_permission" "logging_fe" {
   action        = "lambda:InvokeFunction"
-  function_name = var.function_fe
+  function_name = aws_lambda_function.lambda_fe.function_name
   principal     = "logs.us-east-1.amazonaws.com"
   source_arn    = "${aws_cloudwatch_log_group.log_group_fe.arn}:*"
 }
@@ -10,7 +10,7 @@ resource "aws_cloudwatch_log_group" "log_group_fe" {
 }
 resource "aws_lambda_permission" "logging_be" {
   action        = "lambda:InvokeFunction"
-  function_name = var.function_be
+  function_name = aws_lambda_function.lambda_be.function_name
   principal     = "logs.us-east-1.amazonaws.com"
   source_arn    = "${aws_cloudwatch_log_group.log_group_be.arn}:*"
 }

@@ -31,7 +31,7 @@ resource "aws_security_group" "security_group" {
 resource "aws_lambda_permission" "allow_apigw_fe_invoke_lambda" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = var.function_fe
+  function_name = aws_lambda_function.lambda_fe.function_name
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "${aws_api_gateway_rest_api.rest_api_fe.execution_arn}/*/*"
@@ -40,7 +40,7 @@ resource "aws_lambda_permission" "allow_apigw_fe_invoke_lambda" {
 resource "aws_lambda_permission" "allow_apigw_be_invoke_lambda" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = var.function_fe
+  function_name = aws_lambda_function.lambda_be.function_name
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "${aws_api_gateway_rest_api.rest_api_be.execution_arn}/*/*"
