@@ -3,11 +3,11 @@ variable "aws_region" {
 }
 
 variable "access_key" {
-	default = "AKIA4TSLZATUFBD5HUMV"
+	default = ""
 }
 
 variable "secret_key" {
-	default = "7TfXG5RKbeakheRvnZk4EVEMAlJ2QnNZ4AMhWl3d"
+	default = ""
 }
 
 variable "vpc_cidr" {

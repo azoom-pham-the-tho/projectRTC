@@ -3,11 +3,11 @@ variable "aws_region" {
 }
 
 variable "accountId" {
-	default = "866668578024"
+	default = ""
 }
 
 variable "access_key" {
-	default = "AKIA4TSLZATUFBD5HUMV"
+	default = ""
 }
 
 
