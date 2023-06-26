@@ -37,14 +37,14 @@ resource "aws_api_gateway_resource" "gateway_resource_be" {
 resource "aws_api_gateway_method" "gateway_method_fe" {
   rest_api_id   = aws_api_gateway_rest_api.rest_api_fe.id
   resource_id   = aws_api_gateway_resource.gateway_resource_fe.id
-  http_method   = "POST"
+  http_method   = "GET"
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_method" "gateway_method_be" {
   rest_api_id   = aws_api_gateway_rest_api.rest_api_be.id
   resource_id   = aws_api_gateway_resource.gateway_resource_be.id
-  http_method   = "POST"
+  http_method   = "GET"
   authorization = "NONE"
 }
 
@@ -63,6 +63,26 @@ resource "aws_api_gateway_integration" "gateway_integration_be" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.lambda_be.invoke_arn
+}
+
+resource "aws_lambda_permission" "allow_apigw_fe_invoke_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_fe.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # source_arn = "${aws_api_gateway_rest_api.rest_api_fe.execution_arn}/*/*"
+  source_arn = "arn:aws:execute-api:${var.aws_region}:${var.accountId}:${aws_api_gateway_rest_api.rest_api_fe.id}/*/${aws_api_gateway_method.gateway_method_fe.http_method}${aws_api_gateway_resource.gateway_resource_fe.path}"
+}
+
+resource "aws_lambda_permission" "allow_apigw_be_invoke_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_be.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # source_arn = "${aws_api_gateway_rest_api.rest_api_be.execution_arn}/*/*"
+  source_arn = "arn:aws:execute-api:${var.aws_region}:${var.accountId}:${aws_api_gateway_rest_api.rest_api_be.id}/*/${aws_api_gateway_method.gateway_method_be.http_method}${aws_api_gateway_resource.gateway_resource_be.path}"
 }
 
 resource "aws_api_gateway_deployment" "gateway_deployment_fe" {

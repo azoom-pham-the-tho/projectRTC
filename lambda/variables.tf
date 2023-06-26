@@ -2,12 +2,17 @@ variable "aws_region" {
 	default = "us-east-1"
 }
 
-variable "access_key" {
-	default = ""
+variable "accountId" {
+	default = "866668578024"
 }
 
+variable "access_key" {
+	default = "AKIA4TSLZATUFBD5HUMV"
+}
+
+
 variable "secret_key" {
-	default = ""
+	default = "7TfXG5RKbeakheRvnZk4EVEMAlJ2QnNZ4AMhWl3d"
 }
 
 variable "function_fe" {
