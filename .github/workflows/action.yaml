@@ -31,8 +31,6 @@ jobs:
           port: 22
           source: ./*
           target: /workspace/testCICD
-          script: |
-            ls
 
       - name: cleanup
         run: rm -rf ~/.ssh
@@ -51,4 +49,7 @@ jobs:
             key: ${{ secrets.SSH_PRIVATE_KEY }}
             port: 22
             script: |
-              cd workspace && ls -la
+              echo "${{ env.ENV_FE }}" > ./vue-rtc/.env
+              echo "${{ env.ENV_BE }}" > ./nest-server-rtc/.env
+              echo "${{ env.ENV_PROXY }}" > ./proxy/.env
+              cd workspace && ls
