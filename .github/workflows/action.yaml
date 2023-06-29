@@ -18,24 +18,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install SSH client
-        run: |
-          sudo apt-get update
-          sudo apt-get install openssh-client -y
-
-      - name: Configure SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/authorized_keys
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa 94.237.79.161 >> ~/.ssh/known_hosts
-
-
-      - name: Remote SSH command
-        run: |
-          ssh user@94.237.79.161 "ls"
-
-      - name: Test command in server
-        run: |
-          cd ~/workspace && ls -la
+      - name: SSH to remote server
+        uses: appleboy/ssh-action@master
+        with:
+          host: 94.237.79.161
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/workspace && ls -la
