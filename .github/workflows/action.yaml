@@ -24,8 +24,8 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "."
-          target: "/workspace/testCICD/projectRTC"
+          source: ./
+          target: /workspace/testCICD
 
       - name: cleanup
         run: rm -rf ~/.ssh
@@ -45,6 +45,3 @@ jobs:
             port: 22
             script: |
               cd workspace && ls -la
-        - name: Run deployment script
-          run: |
-            cd workspace && ls -la
