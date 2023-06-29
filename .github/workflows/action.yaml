@@ -27,16 +27,14 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/authorized_keys
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa 94.237.79.161 >> ~/.ssh/known_hosts
 
-      - name: Remote SSH command (debug)
-        run: |
-          ssh -v user@94.237.79.161
 
       - name: Remote SSH command
         run: |
-          ssh user@94.237.79.161
+          ssh user@94.237.79.161 "ls"
 
       - name: Test command in server
         run: |
