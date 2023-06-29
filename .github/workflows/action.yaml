@@ -32,11 +32,11 @@ jobs:
 
       - name: Remote SSH command (debug)
         run: |
-          ssh -v root@94.237.79.161
+          ssh -v user@94.237.79.161
 
       - name: Remote SSH command
         run: |
-          ssh root@94.237.79.161
+          ssh user@94.237.79.161
 
       - name: Test command in server
         run: |
