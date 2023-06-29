@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Copy code to server
-        uses: appleboy/scp-action@v0.1.4
+        uses: appleboy/ssh-action@master
         with:
            host: 94.237.79.161
            username: root
