@@ -26,9 +26,13 @@ jobs:
       - name: Configure SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqSGmRDsKvE1TFs/p9klRNxrGbKTUDHj/RhZHjJgC4NV9kqu9xkDRHdQQPw/y6DOfZx5GHMxso9OI76mWaVbTKWGGY1rPKIQA9a9GAxSIKsqsJgnCmGUYFvcgK2dmRBeJ27LiXNZ2uJlFhbQ8dXCJ2vPoO7QlIWY7WiIJov19NRXFXd8OR16EK/YijetRQr/gHp4XXO2+sCVU6KNH25w6mKkMV2UmzXq4Qle/fz6Qw0XMUInHbL4y1d9nrpjJtErPNhOSgW0pfJMionkcnO5k1C9Ca5qQLE8jIviZ092IOaIWh6u2uyZXEt/g/2dA3K50KLgu/wuw4K5zXIdD7Pttd root@upcloud-azoompham.the.tho-dev" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa 94.237.79.161 >> ~/.ssh/known_hosts
+
+      - name: Read SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}"
 
       - name: Remote SSH command
         run: |
