@@ -23,13 +23,13 @@ jobs:
         run: ls -la
 
       - name: Copy code to server
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: 94.237.79.161
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: ./
+          source: ./*
           target: /workspace/testCICD
 
       - name: cleanup
