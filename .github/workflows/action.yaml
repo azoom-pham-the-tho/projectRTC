@@ -46,6 +46,6 @@ jobs:
             key: ${{ secrets.SSH_PRIVATE_KEY }}
             port: 22
             script: |
-              cd workspace/testCICD && echo $ENV_FE > ./vue-rtc/.env && echo $ENV_BE > ./nest-server-rtc/.env  && echo $ENV_PROXY > ./proxy/.env
+              cd workspace/testCICD && echo "${{ vars.ENV_FE }}" > ./vue-rtc/.env && echo "${{ vars.ENV_BE }}"> ./nest-server-rtc/.env  && echo "${{ vars.ENV_PROXY }}"> ./proxy/.env
               ls
 
