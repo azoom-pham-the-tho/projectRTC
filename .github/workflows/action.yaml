@@ -22,12 +22,12 @@ jobs:
       - name: Copy code to server
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: 94.237.79.161
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          source: ./*
-          target: /workspace/testCICD
+           host: 94.237.79.161
+           username: root
+           key: ${{ secrets.SSH_PRIVATE_KEY }}
+           port: 22
+           script: |
+            cp -R . /workspace/testCICD
 
       - name: cleanup
         run: rm -rf ~/.ssh
@@ -46,7 +46,7 @@ jobs:
             key: ${{ secrets.SSH_PRIVATE_KEY }}
             port: 22
             script: |
-              echo "${{ env.ENV_FE }}" > ./vue-rtc/.env
-              echo "${{ env.ENV_BE }}" > ./nest-server-rtc/.env
-              echo "${{ env.ENV_PROXY }}" > ./proxy/.env
-              cd workspace && ls
+              cd /workspace/testCICD && echo "${{ env.ENV_FE }}" > ./vue-rtc/.env
+              cd /workspace/testCICD && echo "${{ env.ENV_BE }}" > ./nest-server-rtc/.env
+              cd /workspace/testCICD && echo "${{ env.ENV_PROXY }}" > ./proxy/.env
+         
