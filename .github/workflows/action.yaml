@@ -17,5 +17,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Run a command
-        run: whoami
+
+      - name: Install SSH client
+        run: |
+          sudo apt-get update
+          sudo apt-get install openssh-client -y
+
+      - name: Configure SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa 94.237.79.161 >> ~/.ssh/known_hosts
+
+      - name: Remote SSH command
+        run: |
+          ssh root@94.237.79.161 "ls"
+
+      - name: Test command in server
+        run: |
+          cd ~/workspace && ls -la
