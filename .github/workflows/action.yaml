@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 765 ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa 94.237.79.161 >> ~/.ssh/known_hosts
 
       - name: Remote SSH command (debug)
