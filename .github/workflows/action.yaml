@@ -26,8 +26,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-           cd workspace |
-           ls -la
+           cd workspace && ls -la
 
       - name: cleanup
         run: rm -rf ~/.ssh
