@@ -28,6 +28,5 @@ jobs:
           script: |
            ls -la
 
-      - name: Test command in server
-        run: |
-          cd ~/workspace && ls -la
+      - name: cleanup
+        run: rm -rf ~/.ssh
