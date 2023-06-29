@@ -31,6 +31,8 @@ jobs:
           port: 22
           source: ./*
           target: /workspace/testCICD
+          script: |
+            ls
 
       - name: cleanup
         run: rm -rf ~/.ssh
