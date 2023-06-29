@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run a command
         run: 'echo "Hello, world!"'
   build:
@@ -16,7 +16,7 @@ jobs:
     needs: test
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install SSH client
         run: |
@@ -27,16 +27,16 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          chmod 765 ~/.ssh/id_rsa
           ssh-keyscan -t rsa 94.237.79.161 >> ~/.ssh/known_hosts
 
-      - name: Read SSH key
+      - name: Remote SSH command (debug)
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}"
+          ssh -v root@94.237.79.161
 
       - name: Remote SSH command
         run: |
-          ssh root@94.237.79.161 "ls"
+          ssh root@94.237.79.161
 
       - name: Test command in server
         run: |
