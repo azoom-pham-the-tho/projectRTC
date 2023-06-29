@@ -30,10 +30,6 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa 94.237.79.161 >> ~/.ssh/known_hosts
 
-      - name: test ssh key
-        run: |
-          cat ~/home/runner/.ssh/id_rsa
-
       - name: Remote SSH command
         run: |
           ssh root@94.237.79.161 "ls"
