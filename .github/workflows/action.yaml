@@ -27,7 +27,7 @@ jobs:
         run: cd vue-rtc && npm run build
 
       - name: Archive files
-        run: cd vue-rtc && zip -r fe.zip ./*
+        run: cd vue-rtc && zip -r fe.zip ./dist/*
 
       - name: List file
         run: cd vue-rtc && ls
@@ -63,7 +63,7 @@ jobs:
         run: cd nest-server-rtc && npm run build
 
       - name: Archive files
-        run: cd nest-server-rtc && zip -r be.zip ./*
+        run: cd nest-server-rtc && zip -r be.zip ./dist/*
 
       - name: List file
         run: cd nest-server-rtc && ls
