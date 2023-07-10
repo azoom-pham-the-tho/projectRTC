@@ -4,57 +4,35 @@ on:
   push:
     branches:
       - main
-
 jobs:
-  build-fe:
+  build-and-deploy-fe:
     runs-on: ubuntu-latest
     # if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+         node-version: '18'
 
-      - name: Open working-directory
-        run: cd vue-rtc
-
-      - name: Install dependencies
-        run: ls && npm install
-
-      - name: Build
-        run: npm run build
-
-      - name: Archive files
-        run: mkdir -p ../codebuild &&  zip -r ../codebuild/fe.zip ./*
-  build-be:
-    runs-on: ubuntu-latest
-    # if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Open working-directory
-        run: cd nest-server-rtc
+      - name: Install environments
+        run: cd vue-rtc && echo ${{ vars.ENV_FE }} >> .env
 
       - name: Install dependencies
-        run: npm install
+        run: cd vue-rtc && npm install
 
       - name: Build
-        run: npm run build
+        run: cd vue-rtc && npm run build
 
       - name: Archive files
-        run: mkdir -p ../codebuild && zip -r ../codebuild/be.zip ./*
+        run: cd vue-rtc && zip -r fe.zip ./*
 
-      - name: list file
-        run: ls
-  deploy-fe:
-    runs-on: ubuntu-latest
-    needs: build-fe
-    steps:
-      # - name: Checkout code
-      #   uses: actions/checkout@v3
+      - name: List file
+        run: cd vue-rtc && ls
 
-      - name: check code
-        run: ls
-      # - name: Deploy to Lambda
+    # - name: Deploy to Lambda
       #   uses: appleboy/lambda-action@v2
       #   with:
       #     aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -63,17 +41,33 @@ jobs:
       #     function_name: "my-lambda-function"
       #     zip_file: lambda.zip
 
-  deploy-be:
+  build-and-deploy-be:
     runs-on: ubuntu-latest
-    needs: build-be
+    # if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: check code
-        run: ls
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
 
-      # - name: Deploy to Lambda
+      - name: Install environments
+        run: cd vue-rtc && echo ${{ vars.ENV_FE }} >> .env
+
+      - name: Install dependencies
+        run: cd nest-server-rtc && npm install
+
+      - name: Build
+        run: cd nest-server-rtc && npm run build
+
+      - name: Archive files
+        run: cd nest-server-rtc && zip -r be.zip ./*
+
+      - name: List file
+        run: cd nest-server-rtc && ls
+    # - name: Deploy to Lambda
       #   uses: appleboy/lambda-action@v2
       #   with:
       #     aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
