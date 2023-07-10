@@ -17,13 +17,13 @@ jobs:
         run: cd vue-rtc
 
       - name: Install dependencies
-        run: npm install
+        run: ls && npm install
 
       - name: Build
         run: npm run build
 
       - name: Archive files
-        run: zip -r ../codebuild/fe.zip ./*
+        run: mkdir -p ../codebuild &&  zip -r ../codebuild/fe.zip ./*
   build-be:
     runs-on: ubuntu-latest
     # if: github.ref == 'refs/heads/main'
@@ -41,7 +41,7 @@ jobs:
         run: npm run build
 
       - name: Archive files
-        run: zip -r ../codebuild/be.zip ./*
+        run: mkdir -p ../codebuild && zip -r ../codebuild/be.zip ./*
   deploy-fe:
     runs-on: ubuntu-latest
     needs: build-fe
