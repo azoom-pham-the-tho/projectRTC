@@ -7,7 +7,7 @@ on:
 jobs:
   build-and-deploy-fe:
     runs-on: ubuntu-latest
-    # if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/develop_fe'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -32,9 +32,6 @@ jobs:
       - name: List file
         run: cd vue-rtc && ls
 
-      - name: test
-        run: df -h
-
     # - name: Deploy to Lambda
       #   uses: appleboy/lambda-action@v2
       #   with:
@@ -46,7 +43,7 @@ jobs:
 
   build-and-deploy-be:
     runs-on: ubuntu-latest
-    # if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/develop_be'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
