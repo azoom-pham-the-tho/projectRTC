@@ -42,12 +42,15 @@ jobs:
 
       - name: Archive files
         run: mkdir -p ../codebuild && zip -r ../codebuild/be.zip ./*
+
+      - name: list file
+        run: ls
   deploy-fe:
     runs-on: ubuntu-latest
     needs: build-fe
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # - name: Checkout code
+      #   uses: actions/checkout@v3
 
       - name: check code
         run: ls
