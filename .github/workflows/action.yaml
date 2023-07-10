@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
@@ -31,6 +31,9 @@ jobs:
 
       - name: List file
         run: cd vue-rtc && ls
+
+      - name: test
+        run: df -h
 
     # - name: Deploy to Lambda
       #   uses: appleboy/lambda-action@v2
