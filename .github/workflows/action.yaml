@@ -60,7 +60,7 @@ jobs:
           node-version: '18'
 
       - name: Install environments
-        run: cd vue-rtc && echo ${{ vars.ENV_FE }} >> .env
+        run: cd nest-server-rtc && echo ${{ vars.ENV_BE }} >> .env
 
       - name: Install dependencies
         run: cd nest-server-rtc && npm install
@@ -75,10 +75,10 @@ jobs:
         run: cd nest-server-rtc && ls
 
       - name: unzip file
-        run: cd vue-rtc && mkdir unzip && unzip be.zip -d ./unzip
+        run: cd nest-server-rtc && mkdir unzip && unzip be.zip -d ./unzip
 
       - name: preview unzip
-        run: cd vue-rtc && cd unzip && ls -la
+        run: cd nest-server-rtc && cd unzip && ls -la
     # - name: Deploy to Lambda
       #   uses: appleboy/lambda-action@v2
       #   with:
