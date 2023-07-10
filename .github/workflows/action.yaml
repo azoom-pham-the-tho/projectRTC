@@ -1,51 +1,34 @@
-name: My Workflow
+name: Build and Deploy
+
 on:
   push:
     branches:
       - main
+
 jobs:
-  test:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Run a command
-        run: 'echo "Hello, world!"'
-  build:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # - name: Install dependencies
+      #   run: npm install
 
-      - name: Copy code to server
-        uses: appleboy/scp-action@v0.1.4
-        with:
-           host: 94.237.79.161
-           username: root
-           key: ${{ secrets.SSH_PRIVATE_KEY }}
-           port: 22
-           source: ./*
-           target: workspace/testCICD
+      # - name: Build
+      #   run: npm run build
 
-      - name: cleanup
-        run: rm -rf ~/.ssh
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-        - name: Checkout code
-          uses: actions/checkout@v3
+      - name: Archive files
+        run: zip -r lambda.zip ./*   # Đây là câu lệnh để nén các tệp vào lambda.zip, giả sử tệp được xây dựng được đặt trong thư mục "dist"
 
-        - name: SSH to remote server
-          uses: appleboy/ssh-action@master
-          with:
-            host: 94.237.79.161
-            username: root
-            key: ${{ secrets.SSH_PRIVATE_KEY }}
-            port: 22
-            script: |
-              cd workspace/testCICD && echo "${{ vars.ENV_FE }}" > ./vue-rtc/.env && echo "${{ vars.ENV_BE }}"> ./nest-server-rtc/.env  && echo "${{ vars.ENV_PROXY }}"> ./proxy/.env
-              ls
-
+      - name: Preview
+        run: ls -la
+      # - name: Deploy to Lambda
+      #   uses: appleboy/lambda-action@v2
+      #   with:
+      #     aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws_region: "us-east-1"
+      #     function_name: "my-lambda-function"
+      #     zip_file: lambda.zip
