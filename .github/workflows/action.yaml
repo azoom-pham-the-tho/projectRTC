@@ -22,8 +22,11 @@ jobs:
       - name: Archive files
         run: zip -r lambda.zip ./*   # Đây là câu lệnh để nén các tệp vào lambda.zip, giả sử tệp được xây dựng được đặt trong thư mục "dist"
 
+
+      - name: view sourtce
+        run: cd lambda && ls
       - name: Preview
-        run: ls -la
+        run: ls
       # - name: Deploy to Lambda
       #   uses: appleboy/lambda-action@v2
       #   with:
