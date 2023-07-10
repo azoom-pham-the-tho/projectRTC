@@ -32,6 +32,12 @@ jobs:
       - name: List file
         run: cd vue-rtc && ls
 
+      - name: unzip file
+        run: cd vue-rtc && mkdir unzip unzip fe.zip -d ./unzip
+
+      - name: preview unzip
+        run: cd vue-rtc && cd unzip && ls -la
+
     # - name: Deploy to Lambda
       #   uses: appleboy/lambda-action@v2
       #   with:
@@ -67,6 +73,12 @@ jobs:
 
       - name: List file
         run: cd nest-server-rtc && ls
+
+      - name: unzip file
+        run: cd vue-rtc && mkdir unzip unzip be.zip -d ./unzip
+
+      - name: preview unzip
+        run: cd vue-rtc && cd unzip && ls -la
     # - name: Deploy to Lambda
       #   uses: appleboy/lambda-action@v2
       #   with:
